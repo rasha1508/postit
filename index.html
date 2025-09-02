@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Post-it Notes</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&family=Kalam:wght@300;400;700&family=Caveat:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #fdf6f0; /* Cream/Ivory background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        font-family: "Inter", sans-serif;
+        color: #4a4a4a; /* Slate Gray for text */
+      }
+      .widget-container {
+        width: 100%;
+        max-width: 320px; /* Reduced from 400px to 320px */
+        background: #fdf6f0; /* Cream/Ivory main background */
+        border-radius: 20px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: 1px solid rgba(74, 74, 74, 0.1);
+      }
+      .widget-header {
+        background: linear-gradient(
+          135deg,
+          #4a4a4a 0%,
+          #34495e 100%
+        ); /* Slate Gray gradient */
+        color: white;
+        padding: 16px 20px;
+        text-align: center;
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .widget-header::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          #a3b18a 0%,
+          #f0e6d2 50%,
+          #a3b18a 100%
+        );
+      }
+      .widget-header h1 {
+        font-family: "Playfair Display", serif;
+        font-size: 1.3rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+      .add-note-btn-header {
+        background: #a3b18a;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .add-note-btn-header:hover {
+        background: #8da173;
+        transform: scale(1.1);
+      }
+      .widget-content {
+        padding: 16px;
+        position: relative;
+        min-height: 250px;
+      }
+      .notes-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .note-item {
+        width: 100%; /* Still full width of the container, but container is narrower */
+        min-height: 100px;
+        padding: 12px;
+        font-family: 'Caveat', cursive;
+        font-size: 1rem;
+        line-height: 1.3;
+        position: relative;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        border-radius: 2px;
+        z-index: 1;
+        transform-origin: center;
+      }
+      .note-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.18);
+        z-index: 10;
+      }
+      .note-item.yellow {
+        background: linear-gradient(135deg, #ffeb3b 0%, #fff176 100%);
+        border: 1px solid #f9a825;
+      }
+      .note-item.pink {
+        background: linear-gradient(135deg, #ff80ab 0%, #ff4081 100%);
+        border: 1px solid #c2185b;
+      }
+      .note-item.blue {
+        background: linear-gradient(135deg, #80d8ff 0%, #40c4ff 100%);
+        border: 1px solid #0288d1;
+      }
+      .note-item.green {
+        background: linear-gradient(135deg, #b9f6ca 0%, #69f0ae 100%);
+        border: 1px solid #00c853;
+      }
+      .note-item.orange {
+        background: linear-gradient(135deg, #ffcc80 0%, #ffa726 100%);
+        border: 1px solid #ef6c00;
+      }
+      .note-item.purple {
+        background: linear-gradient(135deg, #ce93d8 0%, #ab47bc 100%);
+        border: 1px solid #7b1fa2;
+      }
+      .note-item::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        border-width: 0 12px 12px 0;
+        border-style: solid;
+        border-color: transparent rgba(0, 0, 0, 0.1) transparent transparent;
+      }
+      .note-item::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(135deg, transparent 50%, rgba(0, 0, 0, 0.05) 50%);
+      }
+      .note-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 6px;
+      }
+      .note-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #212121;
+        flex: 1;
+        word-wrap: break-word;
+        text-shadow: 0.5px 0.5px 0 rgba(0, 0, 0, 0.1);
+      }
+      .note-actions {
+        display: flex;
+        gap: 4px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .note-item:hover .note-actions {
+        opacity: 1;
+      }
+      .note-action-btn {
+        background: none;
+        border: none;
+        color: #212121;
+        cursor: pointer;
+        font-size: 0.8rem;
+        padding: 2px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+      }
+      .note-action-btn:hover {
+        background: rgba(33, 33, 33, 0.1);
+      }
+      .note-content {
+        flex: 1;
+        color: #212121;
+        word-wrap: break-word;
+        overflow-y: auto;
+        margin-bottom: 6px;
+        font-size: 0.95rem;
+        text-shadow: 0.5px 0.5px 0 rgba(0, 0, 0, 0.1);
+        max-height: 60px;
+      }
+      .note-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.7rem;
+        color: #212121;
+        opacity: 0.7;
+        margin-top: auto;
+        font-family: "Inter", sans-serif;
+      }
+      .note-type {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 1px 4px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.5);
+      }
+      .note-type i {
+        font-size: 0.6rem;
+      }
+      .note-date {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+      .add-note-btn {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #a3b18a;
+        color: white;
+        border: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.1rem;
+        cursor: pointer;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+        transition: all 0.3s ease;
+        z-index: 100;
+      }
+      .add-note-btn:hover {
+        background: #8da173;
+        transform: scale(1.1);
+      }
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
+      .modal-overlay.active {
+        display: flex;
+      }
+      .note-form {
+        width: 320px; /* Match the widget width */
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        z-index: 10000;
+      }
+      .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(74, 74, 74, 0.1);
+      }
+      .form-title {
+        font-family: "Playfair Display", serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #4a4a4a;
+      }
+      .close-btn {
+        background: none;
+        border: none;
+        color: #4a4a4a;
+        font-size: 1.2rem;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.2s ease;
+      }
+      .close-btn:hover {
+        background: rgba(74, 74, 74, 0.1);
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+        color: #4a4a4a;
+        font-size: 0.9rem;
+      }
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid rgba(74, 74, 74, 0.2);
+        border-radius: 6px;
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        color: #4a4a4a;
+        background: #fdf6f0;
+      }
+      .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+        font-family: 'Caveat', cursive;
+        font-size: 1rem;
+      }
+      .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 20px;
+      }
+      .form-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: "Inter", sans-serif;
+      }
+      .form-btn.primary {
+        background: #a3b18a;
+        color: white;
+      }
+      .form-btn.primary:hover {
+        background: #8da173;
+      }
+      .form-btn.secondary {
+        background: #f0e6d2;
+        color: #4a4a4a;
+      }
+      .form-btn.secondary:hover {
+        background: #e0d6c2;
+      }
+      .color-options {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .color-option {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+      }
+      .color-option.selected {
+        border-color: #4a4a4a;
+        transform: scale(1.1);
+      }
+      .color-option.yellow {
+        background: linear-gradient(135deg, #ffeb3b 0%, #fff176 100%);
+      }
+      .color-option.pink {
+        background: linear-gradient(135deg, #ff80ab 0%, #ff4081 100%);
+      }
+      .color-option.blue {
+        background: linear-gradient(135deg, #80d8ff 0%, #40c4ff 100%);
+      }
+      .color-option.green {
+        background: linear-gradient(135deg, #b9f6ca 0%, #69f0ae 100%);
+      }
+      .color-option.orange {
+        background: linear-gradient(135deg, #ffcc80 0%, #ffa726 100%);
+      }
+      .color-option.purple {
+        background: linear-gradient(135deg, #ce93d8 0%, #ab47bc 100%);
+      }
+      .no-notes {
+        text-align: center;
+        padding: 30px 20px;
+        color: #4a4a4a;
+        opacity: 0.7;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+      }
+      .no-notes i {
+        font-size: 2rem;
+        color: #a3b18a;
+        margin-bottom: 10px;
+      }
+      .no-notes p {
+        font-size: 0.85rem;
+        line-height: 1.4;
+        margin-bottom: 15px;
+      }
+      .no-notes .add-note-btn-empty {
+        background: #a3b18a;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .no-notes .add-note-btn-empty:hover {
+        background: #8da173;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="widget-container">
+      <div class="widget-header">
+        <h1>Post-it Notes</h1>
+        <button class="add-note-btn-header" id="addNoteBtnHeader">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+      <div class="widget-content">
+        <div class="notes-container" id="notesContainer">
+          <div class="no-notes">
+            <i class="fas fa-sticky-note"></i>
+            <p>No notes yet.<br />Click the button to create one.</p>
+            <button class="add-note-btn-empty" id="addNoteBtnEmpty">
+              <i class="fas fa-plus"></i> Add Note
+            </button>
+          </div>
+        </div>
+        
+        <button class="add-note-btn" id="addNoteBtn" style="display: none;">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="note-form">
+        <div class="form-header">
+          <div class="form-title" id="formTitle">Add New Note</div>
+          <button class="close-btn" id="closeBtn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <div class="form-group">
+          <label for="noteTitle">Title</label>
+          <input type="text" id="noteTitle" placeholder="Enter note title">
+        </div>
+        
+        <div class="form-group">
+          <label for="noteContent">Content</label>
+          <textarea id="noteContent" placeholder="Enter note content"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="noteType">Type</label>
+          <select id="noteType">
+            <option value="note">Note</option>
+            <option value="link">Link</option>
+            <option value="file">File</option>
+            <option value="resource">Resource</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Color</label>
+          <div class="color-options">
+            <div class="color-option yellow selected" data-color="yellow"></div>
+            <div class="color-option pink" data-color="pink"></div>
+            <div class="color-option blue" data-color="blue"></div>
+            <div class="color-option green" data-color="green"></div>
+            <div class="color-option orange" data-color="orange"></div>
+            <div class="color-option purple" data-color="purple"></div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button class="form-btn secondary" id="cancelBtn">Cancel</button>
+          <button class="form-btn primary" id="saveBtn">Save Note</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // DOM elements
+        const notesContainer = document.getElementById("notesContainer");
+        const addNoteBtn = document.getElementById("addNoteBtn");
+        const addNoteBtnHeader = document.getElementById("addNoteBtnHeader");
+        const addNoteBtnEmpty = document.getElementById("addNoteBtnEmpty");
+        const modalOverlay = document.getElementById("modalOverlay");
+        const closeBtn = document.getElementById("closeBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
+        const saveBtn = document.getElementById("saveBtn");
+        const formTitle = document.getElementById("formTitle");
+        const colorOptions = document.querySelectorAll(".color-option");
+        
+        // Form elements
+        const noteTitle = document.getElementById("noteTitle");
+        const noteContent = document.getElementById("noteContent");
+        const noteType = document.getElementById("noteType");
+        
+        // Selected color
+        let selectedColor = "yellow";
+        let editingIndex = -1;
+        
+        // Function to load notes from localStorage
+        function loadNotes() {
+          return JSON.parse(localStorage.getItem("postItNotes")) || [];
+        }
+        
+        // Function to save notes to localStorage
+        function saveNotes(notes) {
+          localStorage.setItem("postItNotes", JSON.stringify(notes));
+        }
+        
+        // Function to render notes
+        function renderNotes() {
+          const notes = loadNotes();
+          
+          if (notes.length === 0) {
+            notesContainer.innerHTML = `
+              <div class="no-notes">
+                <i class="fas fa-sticky-note"></i>
+                <p>No notes yet.<br />Click the button to create one.</p>
+                <button class="add-note-btn-empty" id="addNoteBtnEmpty">
+                  <i class="fas fa-plus"></i> Add Note
+                </button>
+              </div>
+            `;
+            // Hide floating button, show empty state button
+            addNoteBtn.style.display = "none";
+            // Re-attach event listener to the new button
+            document.getElementById("addNoteBtnEmpty").addEventListener("click", showForm);
+            return;
+          }
+          
+          notesContainer.innerHTML = "";
+          
+          notes.forEach((note, index) => {
+            const noteItem = document.createElement("div");
+            noteItem.className = `note-item ${note.color}`;
+            
+            // Add a slight random rotation for a more realistic look
+            const rotation = (Math.random() * 3) - 1.5; // -1.5 to 1.5 degrees
+            noteItem.style.transform = `rotate(${rotation}deg)`;
+            
+            const typeIcon = note.type === "note" ? "fa-sticky-note" : 
+                            note.type === "link" ? "fa-link" : 
+                            note.type === "file" ? "fa-file" : "fa-book";
+            
+            noteItem.innerHTML = `
+              <div class="note-header">
+                <div class="note-title">${note.title}</div>
+                <div class="note-actions">
+                  <button class="note-action-btn" title="Edit" onclick="editNote(${index})">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="note-action-btn" title="Delete" onclick="deleteNote(${index})">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="note-content">${note.content}</div>
+              <div class="note-meta">
+                <div class="note-type">
+                  <i class="fas ${typeIcon}"></i>
+                  <span>${note.type}</span>
+                </div>
+                <div class="note-date">
+                  <i class="fas fa-calendar"></i>
+                  <span>${note.date}</span>
+                </div>
+              </div>
+            `;
+            
+            notesContainer.appendChild(noteItem);
+          });
+          
+          // Show floating button when there are notes
+          addNoteBtn.style.display = "flex";
+        }
+        
+        // Function to show form
+        function showForm() {
+          modalOverlay.classList.add("active");
+        }
+        
+        // Function to hide form
+        function hideForm() {
+          modalOverlay.classList.remove("active");
+          resetForm();
+        }
+        
+        // Function to reset form
+        function resetForm() {
+          noteTitle.value = "";
+          noteContent.value = "";
+          noteType.value = "note";
+          colorOptions.forEach(option => option.classList.remove("selected"));
+          document.querySelector(".color-option.yellow").classList.add("selected");
+          selectedColor = "yellow";
+          editingIndex = -1;
+          formTitle.textContent = "Add New Note";
+        }
+        
+        // Function to save a note
+        function saveNote() {
+          const title = noteTitle.value.trim();
+          const content = noteContent.value.trim();
+          
+          if (!title || !content) {
+            alert("Please enter both title and content.");
+            return;
+          }
+          
+          const type = noteType.value;
+          const date = new Date().toLocaleDateString();
+          
+          const notes = loadNotes();
+          
+          if (editingIndex >= 0) {
+            // Edit existing note
+            notes[editingIndex] = { title, content, type, date, color: selectedColor };
+          } else {
+            // Add new note
+            notes.push({ title, content, type, date, color: selectedColor });
+          }
+          
+          saveNotes(notes);
+          renderNotes();
+          hideForm();
+        }
+        
+        // Function to edit a note
+        function editNote(index) {
+          const notes = loadNotes();
+          const note = notes[index];
+          
+          noteTitle.value = note.title;
+          noteContent.value = note.content;
+          noteType.value = note.type;
+          
+          // Set color selection
+          colorOptions.forEach(option => option.classList.remove("selected"));
+          document.querySelector(`.color-option.${note.color}`).classList.add("selected");
+          selectedColor = note.color;
+          
+          editingIndex = index;
+          formTitle.textContent = "Edit Note";
+          
+          // Show form
+          showForm();
+        }
+        
+        // Function to delete a note
+        function deleteNote(index) {
+          if (confirm("Are you sure you want to delete this note?")) {
+            const notes = loadNotes();
+            notes.splice(index, 1);
+            saveNotes(notes);
+            renderNotes();
+          }
+        }
+        
+        // Event listeners
+        addNoteBtn.addEventListener("click", showForm);
+        addNoteBtnHeader.addEventListener("click", showForm);
+        addNoteBtnEmpty.addEventListener("click", showForm);
+        closeBtn.addEventListener("click", hideForm);
+        cancelBtn.addEventListener("click", hideForm);
+        saveBtn.addEventListener("click", saveNote);
+        
+        // Close modal when clicking outside the form
+        modalOverlay.addEventListener("click", function(e) {
+          if (e.target === modalOverlay) {
+            hideForm();
+          }
+        });
+        
+        // Color selection
+        colorOptions.forEach(option => {
+          option.addEventListener("click", function() {
+            colorOptions.forEach(opt => opt.classList.remove("selected"));
+            this.classList.add("selected");
+            selectedColor = this.dataset.color;
+          });
+        });
+        
+        // Initial render
+        renderNotes();
+        
+        // Make functions global for onclick handlers
+        window.editNote = editNote;
+        window.deleteNote = deleteNote;
+      });
+    </script>
+  </body>
+</html>
