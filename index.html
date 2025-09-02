@@ -19,7 +19,7 @@
         box-sizing: border-box;
       }
       body {
-        background: transparent; /* Cream/Ivory background */
+        background: #fdf6f0; /* Cream/Ivory background */
         display: flex;
         justify-content: center;
         align-items: center;
@@ -30,7 +30,7 @@
       }
       .widget-container {
         width: 100%;
-        max-width: 320px; /* Reduced from 400px to 320px */
+        max-width: 280px; /* Reduced from 320px to 280px */
         background: #fdf6f0; /* Cream/Ivory main background */
         border-radius: 20px;
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
@@ -99,7 +99,7 @@
         gap: 12px;
       }
       .note-item {
-        width: 100%; /* Still full width of the container, but container is narrower */
+        width: 100%;
         min-height: 100px;
         padding: 12px;
         font-family: 'Caveat', cursive;
@@ -235,29 +235,6 @@
         align-items: center;
         gap: 2px;
       }
-      .add-note-btn {
-        position: absolute;
-        bottom: 12px;
-        right: 12px;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: #a3b18a;
-        color: white;
-        border: none;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 1.1rem;
-        cursor: pointer;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
-        transition: all 0.3s ease;
-        z-index: 100;
-      }
-      .add-note-btn:hover {
-        background: #8da173;
-        transform: scale(1.1);
-      }
       .modal-overlay {
         position: fixed;
         top: 0;
@@ -274,7 +251,7 @@
         display: flex;
       }
       .note-form {
-        width: 320px; /* Match the widget width */
+        width: 280px; /* Match the widget width */
         background: white;
         border-radius: 12px;
         padding: 20px;
@@ -462,10 +439,6 @@
             </button>
           </div>
         </div>
-        
-        <button class="add-note-btn" id="addNoteBtn" style="display: none;">
-          <i class="fas fa-plus"></i>
-        </button>
       </div>
     </div>
     
@@ -521,7 +494,6 @@
       document.addEventListener("DOMContentLoaded", function () {
         // DOM elements
         const notesContainer = document.getElementById("notesContainer");
-        const addNoteBtn = document.getElementById("addNoteBtn");
         const addNoteBtnHeader = document.getElementById("addNoteBtnHeader");
         const addNoteBtnEmpty = document.getElementById("addNoteBtnEmpty");
         const modalOverlay = document.getElementById("modalOverlay");
@@ -564,8 +536,6 @@
                 </button>
               </div>
             `;
-            // Hide floating button, show empty state button
-            addNoteBtn.style.display = "none";
             // Re-attach event listener to the new button
             document.getElementById("addNoteBtnEmpty").addEventListener("click", showForm);
             return;
@@ -589,10 +559,10 @@
               <div class="note-header">
                 <div class="note-title">${note.title}</div>
                 <div class="note-actions">
-                  <button class="note-action-btn" title="Edit" onclick="editNote(${index})">
+                  <button class="note-action-btn edit-btn" data-index="${index}" title="Edit">
                     <i class="fas fa-edit"></i>
                   </button>
-                  <button class="note-action-btn" title="Delete" onclick="deleteNote(${index})">
+                  <button class="note-action-btn delete-btn" data-index="${index}" title="Delete">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
@@ -613,8 +583,20 @@
             notesContainer.appendChild(noteItem);
           });
           
-          // Show floating button when there are notes
-          addNoteBtn.style.display = "flex";
+          // Add event listeners to action buttons
+          document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const index = parseInt(this.getAttribute('data-index'));
+              editNote(index);
+            });
+          });
+          
+          document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const index = parseInt(this.getAttribute('data-index'));
+              deleteNote(index);
+            });
+          });
         }
         
         // Function to show form
@@ -700,7 +682,6 @@
         }
         
         // Event listeners
-        addNoteBtn.addEventListener("click", showForm);
         addNoteBtnHeader.addEventListener("click", showForm);
         addNoteBtnEmpty.addEventListener("click", showForm);
         closeBtn.addEventListener("click", hideForm);
@@ -725,10 +706,6 @@
         
         // Initial render
         renderNotes();
-        
-        // Make functions global for onclick handlers
-        window.editNote = editNote;
-        window.deleteNote = deleteNote;
       });
     </script>
   </body>
