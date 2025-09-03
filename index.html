@@ -489,7 +489,6 @@
         </div>
       </div>
     </div>
-
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // DOM elements
@@ -559,10 +558,10 @@
               <div class="note-header">
                 <div class="note-title">${note.title}</div>
                 <div class="note-actions">
-                  <button class="note-action-btn edit-btn" data-index="${index}" title="Edit">
+                  <button class="note-action-btn" title="Edit" data-index="${index}">
                     <i class="fas fa-edit"></i>
                   </button>
-                  <button class="note-action-btn delete-btn" data-index="${index}" title="Delete">
+                  <button class="note-action-btn" title="Delete" data-index="${index}">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
@@ -581,21 +580,6 @@
             `;
             
             notesContainer.appendChild(noteItem);
-          });
-          
-          // Add event listeners to action buttons
-          document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-              const index = parseInt(this.getAttribute('data-index'));
-              editNote(index);
-            });
-          });
-          
-          document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-              const index = parseInt(this.getAttribute('data-index'));
-              deleteNote(index);
-            });
           });
         }
         
@@ -673,12 +657,10 @@
         
         // Function to delete a note
         function deleteNote(index) {
-          if (confirm("Are you sure you want to delete this note?")) {
-            const notes = loadNotes();
-            notes.splice(index, 1);
-            saveNotes(notes);
-            renderNotes();
-          }
+          const notes = loadNotes();
+          notes.splice(index, 1);
+          saveNotes(notes);
+          renderNotes();
         }
         
         // Event listeners
@@ -702,6 +684,25 @@
             this.classList.add("selected");
             selectedColor = this.dataset.color;
           });
+        });
+        
+        // Event delegation for note actions (edit/delete)
+        notesContainer.addEventListener('click', function(e) {
+          // Find the closest button with data-index attribute
+          const button = e.target.closest('.note-action-btn[data-index]');
+          
+          if (button) {
+            const index = parseInt(button.getAttribute('data-index'));
+            
+            // Check if it's a delete button
+            if (button.querySelector('.fa-trash')) {
+              deleteNote(index);
+            } 
+            // Check if it's an edit button
+            else if (button.querySelector('.fa-edit')) {
+              editNote(index);
+            }
+          }
         });
         
         // Initial render
